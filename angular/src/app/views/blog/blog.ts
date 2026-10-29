@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, NgZone, signal } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 // Service Imports
@@ -23,6 +23,7 @@ export interface isolation {
   selector: 'doc-blog',
   imports: [ PostPreviewer, PostViewer ],
   templateUrl: './blog.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './blog.css'
 })
 export class Blog implements AfterViewInit, OnDestroy {

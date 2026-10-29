@@ -1,4 +1,4 @@
-import { Component, input, signal, computed } from '@angular/core';
+import { Component, input, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 
 const MIN_QTY = 1;
 const MAX_QTY = 99;
@@ -30,6 +30,7 @@ const MAX_QTY = 99;
       </button>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .qty-group {
       display: flex;

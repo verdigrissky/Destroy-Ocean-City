@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 // Structural Component Import
@@ -26,6 +26,7 @@ import { MaintenanceService } from './services/maintenance-service';
       <doc-footer></doc-footer>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     @keyframes vt-fade-in { from { opacity: 0 } to { opacity: 1 } }
     @keyframes vt-fade-out { from { opacity: 1 } to { opacity: 0 } }

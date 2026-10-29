@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { AlertService } from '../../services/alert-service';
 
@@ -6,6 +6,7 @@ import { AlertService } from '../../services/alert-service';
   selector: 'alert',
   imports: [ NgClass ],
   templateUrl: './alert.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './alert.css'
 })
 export class AlertComponent {

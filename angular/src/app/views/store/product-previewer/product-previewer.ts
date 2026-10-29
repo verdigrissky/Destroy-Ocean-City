@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 // Component Imports
@@ -57,6 +57,7 @@ const IMAGE_BASE = 'https://images.destroyocean.city/products';
       z-index: 2;
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
   @if (product()) {
     <div class="card h-100 w-100 product-card" [routerLink]="isOverProduct ? (product()!.slug ? ['/merchandise/swag', product()!.slug] : ['/merchandise/swag/id', product()!.id]) : null">

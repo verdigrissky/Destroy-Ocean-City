@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ThemeService } from '../../services/theme-service';
@@ -6,6 +6,7 @@ import { ThemeService } from '../../services/theme-service';
 @Component({
   selector: 'doc-header',
   imports: [ NgClass, RouterLink, RouterLinkActive ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './header.html'
 })
 export class Header {

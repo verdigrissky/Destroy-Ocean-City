@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { BackendStatus } from '../../services/maintenance-service';
 
 @Component({
@@ -19,6 +19,7 @@ import { BackendStatus } from '../../services/maintenance-service';
     </p>
   </main>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .maintenance {
       position: fixed;

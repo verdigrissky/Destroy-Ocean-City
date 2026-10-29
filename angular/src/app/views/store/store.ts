@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 
 // Component Imports
 import { ProductPreviewer } from './product-previewer/product-previewer';
@@ -21,6 +21,7 @@ import slogansData from '../../data/slogans.json';
   selector: 'app-store',
   imports: [ProductPreviewer, StoreCartButton, StoreSloganator],
   templateUrl: './store.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .store-sk-image { height: 280px; width: 100%; border-radius: var(--bs-border-radius) var(--bs-border-radius) 0 0; }
     .store-sk-btn   { height: 2.5rem; width: 100%; }

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, signal } from '@angular/core';
+import { Component, HostListener, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { ApiService } from '../../services/api-service';
@@ -11,6 +11,7 @@ import { hero } from '../../models/hero-model';
   selector: 'app-team',
   imports: [ SafeHtmlPipe, RouterLink ],
   templateUrl: './team.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles:`
     .hero-intro-container {
       margin-bottom: 1rem;

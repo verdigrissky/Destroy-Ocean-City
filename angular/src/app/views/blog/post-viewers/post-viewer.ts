@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, HostListener, signal } from '@angular/core';
+import { Component, Input, OnDestroy, HostListener, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 // Service Imports
@@ -84,6 +84,7 @@ import { post } from '../../../models/post-model';
       </div>
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     :host {
       --app-radius: 0.5rem;

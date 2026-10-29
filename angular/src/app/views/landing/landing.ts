@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 // Service Imports
@@ -15,6 +15,7 @@ import { post } from '../../models/post-model';
   selector: 'landing',
   imports: [ PostPreviewer, RouterLink ],
   templateUrl: './landing.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './landing.css'
 })
 export class Landing {

@@ -1,10 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'store-cart-display',
   imports: [],
   templateUrl: './store-cart.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './store-cart.css',
 })
 export class StoreCart {
@@ -34,6 +35,7 @@ export class StoreCart {
       border-radius: 2px;
     }
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="dropdown">
       <button type="button" class="cart-btn dropdown-toggle"

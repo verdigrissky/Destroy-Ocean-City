@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 
 // Service Imports
@@ -11,6 +11,7 @@ import { postComment } from '../../../models/postComment-model';
 @Component({
   selector: 'commentViewer',
   imports: [ DatePipe ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
   @if (comments.length > 0) {
     <section>

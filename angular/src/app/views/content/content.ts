@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -17,6 +17,7 @@ import { post } from '../../models/post-model';
   selector: 'contentViewer',
   imports: [ PostViewer ],
   styleUrl: './content.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @if (isLoading()) {
       <article class="card paper px-0 mb-4 mx-auto content-loading">

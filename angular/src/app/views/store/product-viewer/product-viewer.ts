@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CurrencyPipe } from '@angular/common';
 
@@ -31,6 +31,7 @@ function buildImageUrl(slug: string, angle: string, size: 'full' | '600' | '50')
   selector: 'product-viewer',
   imports: [RouterLink, CurrencyPipe, StoreCartButton, StoreSloganator, ProductImageComponent, LightboxComponent, AddToCart],
   templateUrl: './product-viewer.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .pv-sk-image { height: 320px; width: 100%; }
     .pv-sk-thumb { width: 50px; height: 50px; flex-shrink: 0; }

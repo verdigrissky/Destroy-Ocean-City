@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { AlertService } from '../../services/alert-service';
 import { ApiService } from '../../services/api-service';
@@ -7,6 +7,7 @@ import { ApiService } from '../../services/api-service';
   selector: 'app-testing',
   imports: [],
   templateUrl: './testing.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './testing.css'
 })
 export class Testing {

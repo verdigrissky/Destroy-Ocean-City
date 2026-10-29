@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, Input, Output, EventEmitter, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 
 const PROXY_BASE = 'https://dropship.destroyocean.city';
 const PRINTFUL_CDN_HOST = 'files.cdn.printful.com';
@@ -10,6 +10,7 @@ const PRINTFUL_CDN_HOST = 'files.cdn.printful.com';
       <img #productImage class="productPreviewImage" [src]="proxiedSrc" [alt]="altText" crossorigin="anonymous" (load)="onImageLoad()" (error)="onImageError()" [style.filter]="currentCursor === 'pointer' ? 'brightness(125%)' : 'brightness(100%)'">
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .productPreviewImage {
       width: 100%;

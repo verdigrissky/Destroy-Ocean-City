@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { SloganatorService } from '../../services/sloganator-service';
 
 @Component({
@@ -8,6 +8,7 @@ import { SloganatorService } from '../../services/sloganator-service';
       {{ sloganatorService.displayText() }}<span class="typewriter-cursor">|</span>
     </h5>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .typewriter-cursor {
       animation: blink 0.7s step-end infinite;

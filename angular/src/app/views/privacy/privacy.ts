@@ -1,10 +1,11 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { TitleService } from '../../services/title-service';
 
 @Component({
   selector: 'app-privacy',
   imports: [ DatePipe ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './privacy.html'
 })
 export class Privacy implements OnInit, OnDestroy {

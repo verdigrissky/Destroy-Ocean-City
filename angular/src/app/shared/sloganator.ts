@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, inject, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject, AfterViewInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
 import { SloganatorService } from '../services/sloganator-service';
 
 const WING_MS = 500;
@@ -18,6 +18,7 @@ const REST_MS = 3500;
     </div>
     <small #measurer class="slogan-measurer monospace">{{ measureSlogan }}</small>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
     .slogan-row { gap: 6px; }
     .slogan-container {

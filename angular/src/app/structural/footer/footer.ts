@@ -1,4 +1,4 @@
-import { Component, VERSION } from '@angular/core';
+import { Component, VERSION, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { version } from '../../../../package.json';
 
@@ -30,6 +30,7 @@ import { version } from '../../../../package.json';
     </div>
   </footer>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .south-link {
       color: #ff5252;
