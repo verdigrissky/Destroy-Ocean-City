@@ -3,6 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, Observable, throwError, switchMap, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AlertService } from './alert-service';
+import { MaintenanceService } from './maintenance-service';
 import { post } from '../models/post-model';
 import { postComment } from '../models/postComment-model';
 import { hero } from '../models/hero-model';
@@ -19,7 +20,7 @@ export class ApiService {
   private promotedHeroId = 4;
   private promotedUiId = 3;
 
-  constructor(private http: HttpClient, private alertService: AlertService) { }
+  constructor(private http: HttpClient, private alertService: AlertService, private maintenance: MaintenanceService) { }
 
   getPosts(tagId: number): Observable<post[]> {
     return this.http
@@ -120,6 +121,10 @@ export class ApiService {
 
   private handleError(error: any, context: string) {
     console.error(`API error while ${context}:`, error);
+
+    if (this.maintenance.down()) {
+      return throwError(() => error);
+    }
 
     let message = 'An unexpected error occurred while communicating with the backend API.';
 

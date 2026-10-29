@@ -56,6 +56,37 @@ Then, you can use the following command within /angular to automate pushing buil
 ./deploy.sh
 ```
 
+## Backend Outages and Maintenance Mode
+
+When the backend API is unavailable, the app stops routing entirely and replaces the whole site (header, views, store, and footer) with a black screen showing the site logo and a status message. The URL is left untouched, so once the backend recovers, a refresh returns visitors to the page they were on.
+
+The app checks the API once before first render, then watches every API request for the rest of the visit. The logic lives in `src/app/services/maintenance-service.ts` and `src/app/services/maintenance-interceptor.ts`; the screen itself is `src/app/structural/maintenance/maintenance.ts`.
+
+There are two states:
+
+| State | Triggered by | Message |
+| --- | --- | --- |
+| Maintenance | A `503` with the body `{"code":"backend_offline"}`, from any request | Structural windmill damage inspection |
+| Outage | A request to `api.destroyocean.city` that is unreachable (status `0`) or returns a Cloudflare gateway error (`502`, `503`, `504`, `520`–`527`, `530`) | Rogue offshore gust |
+
+Maintenance takes precedence over an outage. Plain `500` errors and failures from `dropship.destroyocean.city` do not trigger either state; they show the usual error alert instead.
+
+### Putting the site into maintenance mode
+
+Configure nginx on the backend to answer API requests with the `backend_offline` response. The response must include the `Access-Control-Allow-Origin` header (use `add_header ... always`), otherwise the browser hides the response and the app shows the outage screen instead:
+
+```bash
+curl -si -H "Origin: https://destroyocean.city" https://api.destroyocean.city/json/
+```
+
+This should return `HTTP/2 503`, `access-control-allow-origin: https://destroyocean.city`, and `{"code":"backend_offline",...}`.
+
+### Notes
+
+- If the startup check takes longer than 3 seconds, the site loads normally; any later failure will still trigger the appropriate screen.
+- A single failed request is enough to trigger the outage screen.
+- The app calls the production API directly, even from `ng serve`. If the API does not allow `localhost` as an origin, the browser blocks its responses and local development will show the outage screen. To preview the maintenance screen locally, temporarily return `true` from `isOfflineResponse`.
+
 ## Additional Resources
 
 For more information on using the Angular CLI, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.

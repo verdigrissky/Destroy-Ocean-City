@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 // Structural Component Import
@@ -6,19 +6,25 @@ import { Header } from './structural/header/header';
 import { AlertComponent } from './structural/alert/alert';
 import { Sloganator } from "./shared/sloganator";
 import { Footer } from './structural/footer/footer';
+import { Maintenance } from './structural/maintenance/maintenance';
+import { MaintenanceService } from './services/maintenance-service';
 
 @Component({
   selector: 'doc-root',
-  imports: [ Header, AlertComponent, RouterOutlet, Sloganator, Footer ],
+  imports: [ Header, AlertComponent, RouterOutlet, Sloganator, Footer, Maintenance ],
   standalone: true,
   template: `
-    <doc-header></doc-header>
-    <div class="container p-md-5 p-sm-1 my-2" style="min-height: 600px;">
-        <alert></alert>
-        <router-outlet></router-outlet>
-    </div>
-    <sloganator></sloganator>
-    <doc-footer></doc-footer>
+    @if (maintenance.down()) {
+      <doc-maintenance [status]="maintenance.status()"></doc-maintenance>
+    } @else {
+      <doc-header></doc-header>
+      <div class="container p-md-5 p-sm-1 my-2" style="min-height: 600px;">
+          <alert></alert>
+          <router-outlet></router-outlet>
+      </div>
+      <sloganator></sloganator>
+      <doc-footer></doc-footer>
+    }
   `,
   styles: `
     @keyframes vt-fade-in { from { opacity: 0 } to { opacity: 1 } }
@@ -36,5 +42,6 @@ import { Footer } from './structural/footer/footer';
 })
 export class App {
   protected readonly title = signal('destroyOceanCity');
+  protected readonly maintenance = inject(MaintenanceService);
   
 }
