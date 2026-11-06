@@ -1,18 +1,20 @@
-import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, NgZone, signal, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Component, AfterViewInit, OnDestroy, ViewChild, ElementRef, NgZone, DestroyRef, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, ParamMap, Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 // Service Imports
 import { ApiService } from '../../services/api-service';
 import { IdentityService } from '../../services/identity-service';
 import { TitleService } from '../../services/title-service';
+import { ThemeService } from '../../services/theme-service';
 
 // Component Imports
 import { PostPreviewer } from './post-viewers/post-previewer';
 import { PostViewer } from './post-viewers/post-viewer';
 
 // Model Imports
-import { post } from '../../models/post-model';
-import { postComment } from '../../models/postComment-model';
+import { adjacentPost, post } from '../../models/post-model';
 
 export interface isolation {
   type: string;
@@ -21,7 +23,7 @@ export interface isolation {
 
 @Component({
   selector: 'doc-blog',
-  imports: [ PostPreviewer, PostViewer ],
+  imports: [ PostPreviewer, PostViewer, RouterLink ],
   templateUrl: './blog.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './blog.css'
@@ -33,7 +35,9 @@ export class Blog implements AfterViewInit, OnDestroy {
   heading: string = this.defaultHeading;
   isolation: isolation | null = null;
   post = signal<post | null>(null);
-  comments = signal<postComment[]>([]);
+  postNotFound = signal<boolean>(false);
+  previousPost = signal<adjacentPost | null>(null);
+  nextPost = signal<adjacentPost | null>(null);
   posts = signal<post[]>([]);
   sortNewestFirst = signal<boolean>(true);
   isLoadingSinglePost = signal<boolean>(false);
@@ -42,6 +46,8 @@ export class Blog implements AfterViewInit, OnDestroy {
   private resizeObserver?: ResizeObserver;
   private layoutFrameId: number | null = null;
   private shouldAutoScrollOnInitialLoad = true;
+  private loadSub?: Subscription;
+  private destroyRef = inject(DestroyRef);
 
   constructor(
     private route: ActivatedRoute,
@@ -49,12 +55,15 @@ export class Blog implements AfterViewInit, OnDestroy {
     public identity: IdentityService,
     private router: Router,
     private ngZone: NgZone,
-    private titleService: TitleService
+    private titleService: TitleService,
+    private theme: ThemeService
   ) {}
 
   ngOnInit(): void {
-    this.shouldAutoScrollOnInitialLoad = true;
-    this.getPosts();
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      this.shouldAutoScrollOnInitialLoad = true;
+      this.getPosts(params);
+    });
 
   }
 
@@ -84,19 +93,32 @@ export class Blog implements AfterViewInit, OnDestroy {
     }
   }
 
-  getPosts(): void {
-    const slug = this.route.snapshot.paramMap.get('slug');
-    const authorName = this.route.snapshot.paramMap.get('authorName')?.trim();
+  getPosts(params: ParamMap = this.route.snapshot.paramMap): void {
+    const slug = params.get('slug');
+    const authorName = params.get('authorName')?.trim();
+    this.loadSub?.unsubscribe();
+    this.postNotFound.set(false);
+    this.previousPost.set(null);
+    this.nextPost.set(null);
 
     if (slug) {
       this.isLoadingSinglePost.set(true);
       this.isLoadingPosts.set(false);
       this.post.set(null);
-      this.api.getPostBySlug(slug).subscribe({
-        next: ({ post, comments }) => {
+      this.loadSub = this.api.getPostBySlug(slug).subscribe({
+        next: (post) => {
+          if (!post) {
+            this.postNotFound.set(true);
+            this.titleService.setCustomSiteTitle('Post not found');
+            return;
+          }
           this.post.set(post);
-          this.comments.set(comments);
           this.titleService.setCustomSiteTitle(post.title.rendered);
+          this.api.getAdjacentPosts(post).subscribe(({ previous, next }) => {
+            if (this.post() !== post) return;
+            this.previousPost.set(previous);
+            this.nextPost.set(next);
+          });
         },
         complete: () => {
           this.isLoadingSinglePost.set(false);
@@ -111,7 +133,7 @@ export class Blog implements AfterViewInit, OnDestroy {
       this.post.set(null);
       this.isLoadingPosts.set(true);
       this.isolation = {type: 'author', value: authorName};
-      this.api.getPostsByAuthorName(authorName).subscribe({
+      this.loadSub = this.api.getPostsByAuthorName(authorName).subscribe({
         next: (posts) => {
           this.posts.set(this.sortPostsByDate(posts));
           if (posts.length > 0) {
@@ -136,7 +158,7 @@ export class Blog implements AfterViewInit, OnDestroy {
       this.heading = this.defaultHeading;
       this.isLoadingPosts.set(true);
       const promotedTagId = 123;
-      this.api.getPosts(promotedTagId).subscribe({
+      this.loadSub = this.api.getPosts(promotedTagId).subscribe({
         next: (posts) => {
           this.posts.set(this.sortPostsByDate(posts));
           this.scheduleMasonryLayout();
@@ -189,7 +211,7 @@ export class Blog implements AfterViewInit, OnDestroy {
     this.shouldAutoScrollOnInitialLoad = false;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: this.theme.reducedMotion() ? 'auto' : 'smooth' });
       });
     });
   }

@@ -1,22 +1,24 @@
 
-@for (alert of alertService.alerts(); track $index) {
+<div aria-live="polite" aria-relevant="additions">
+@for (alert of alertService.alerts(); track alert.id) {
     <div class="alert doc-alert my-2" [ngClass]="{
         'alert-success' : alert.type === 'success',
         'alert-warning' : alert.type === 'warning',
         'alert-danger'  : alert.type === 'error',
         'alert-info'    : alert.type === 'info'
     }">
-        <i class="bi doc-alert-icon" [ngClass]="{
+        <i class="bi doc-alert-icon" aria-hidden="true" [ngClass]="{
             'bi-check-circle-fill'       : alert.type === 'success',
             'bi-exclamation-diamond-fill': alert.type === 'warning',
             'bi-exclamation-octagon-fill': alert.type === 'error',
             'bi-info-circle-fill'        : alert.type === 'info'
         }"></i>
         @if (alert.dismissible) {
-            <button class="doc-alert-dismiss close-rotate" (click)="dismiss(alert.id)">
-                <i class="bi bi-x-lg"></i>
+            <button type="button" class="doc-alert-dismiss close-rotate" (click)="dismiss(alert.id)" aria-label="Dismiss alert">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
             </button>
         }
         <p class="doc-alert-message" [innerHTML]="alert.message"></p>
     </div>
 }
+</div>

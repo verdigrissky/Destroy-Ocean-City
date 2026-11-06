@@ -1,55 +1,76 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 // Service Imports
 import { FeaturedImageService } from '../../../services/featuredImage-service';
 import { IdentityService } from '../../../services/identity-service';
 
+// Pipe Imports
+import { OrdinalDatePipe } from '../../../pipes/ordinal-date.pipe';
+import { ReadingTimePipe } from '../../../pipes/reading-time.pipe';
+import { SafeHtmlPipe } from '../../../pipes/safe-html.pipe';
+
 // Model Imports
 import { post } from '../../../models/post-model';
 
 @Component({
   selector: 'postPreviewer',
-  imports: [ RouterLink, NgClass ],
+  imports: [ RouterLink, OrdinalDatePipe, ReadingTimePipe, SafeHtmlPipe ],
   template: `
-    @if (this.featured.image(post); as featuredImage) {
-      <div class="cursor-pointer featured-image-wrap sk-img-wrap" [ngClass]="cropFeaturedImage ? 'previewer-image-crop' : ''" [class.image-loading]="!isImageLoaded(post.id, featuredImage)" [routerLink]="['/blog/', post.slug]">
-        <img [src]="featuredImage" class="card-img-top featured-image" [class.image-loaded]="isImageLoaded(post.id, featuredImage)" (load)="onImageLoad(post.id, featuredImage)" alt="Featured image">
+    @if (this.featured.sized(post); as featuredImage) {
+      <div class="featured-image-wrap sk-img-wrap" [class.previewer-image-crop]="cropFeaturedImage" [class.image-loading]="!isImageLoaded(post.id, featuredImage.src)">
+        <img [src]="featuredImage.src" [attr.srcset]="featuredImage.srcset" [attr.sizes]="featuredImage.srcset ? cardImageSizes : null"
+          [attr.width]="featuredImage.width" [attr.height]="featuredImage.height" loading="lazy" decoding="async"
+          class="featured-image" [class.image-loaded]="isImageLoaded(post.id, featuredImage.src)" (load)="onImageLoad(post.id, featuredImage.src)" alt="">
       </div>
     } @else if (cropFeaturedImage) {
-      <div class="cursor-pointer previewer-image-crop featured-image-wrap sk-img-wrap" [class.image-loading]="!isImageLoaded(post.id, fallbackImage(post.id))" [routerLink]="['/blog/', post.slug]">
-        <img [src]="fallbackImage(post.id)" class="card-img-top featured-image" [class.image-loaded]="isImageLoaded(post.id, fallbackImage(post.id))" (load)="onImageLoad(post.id, fallbackImage(post.id))" alt="Featured image">
+      <div class="previewer-image-crop featured-image-wrap sk-img-wrap" [class.image-loading]="!isImageLoaded(post.id, fallbackImage(post.id))">
+        <img [src]="fallbackImage(post.id)" loading="lazy" decoding="async" class="featured-image" [class.image-loaded]="isImageLoaded(post.id, fallbackImage(post.id))" (load)="onImageLoad(post.id, fallbackImage(post.id))" alt="">
       </div>
     }
-    <div class="card-body">
-      <a class="cursor-pointer" [routerLink]="['/blog/', post.slug]">
-        <h4 [innerHTML]="post.title.rendered"></h4>
-      </a>
-      <blockquote class="blockquote mb-0">
-        <p class="cursor-default" [innerHTML]="post.excerpt.rendered"></p>
-        <footer class="blockquote-footer cursor-default mt-4">
-          @if (this.identity.authorAvatar(post)) {
-            <img [src]="this.identity.authorAvatar(post)" alt="Author avatar" class="rounded-circle" width="48" height="48">
-          }
-          {{ this.identity.authorName(post) }}
-        </footer>
-      </blockquote>
+    <div class="card-body preview-body">
+      @if (headingLevel === 3) {
+        <h3 class="preview-title"><a class="preview-link stretched-link" [routerLink]="['/blog', post.slug]" [innerHTML]="post.title.rendered"></a></h3>
+      } @else {
+        <h2 class="preview-title"><a class="preview-link stretched-link" [routerLink]="['/blog', post.slug]" [innerHTML]="post.title.rendered"></a></h2>
+      }
+      <p class="preview-meta text-muted monospace">
+        {{ post.date | ordinalDate }} <span aria-hidden="true">&middot;</span> {{ post.content.rendered | readingTime }}
+      </p>
+      <div class="preview-excerpt" [innerHTML]="post.excerpt.rendered | safeHtml"></div>
+      <div class="preview-byline">
+        @if (this.identity.authorAvatar(post)) {
+          <img [src]="this.identity.authorAvatar(post)" alt="" class="preview-avatar" width="40" height="40">
+        }
+        <div>
+          <span class="preview-author">{{ this.identity.authorName(post) }}</span>
+          <span class="preview-tier text-muted">{{ this.identity.authorTier(post) }}</span>
+        </div>
+      </div>
     </div>
   `,
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: [`
-    .featured-image-wrap {
-      cursor: pointer;
+    :host {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      border-radius: var(--bs-card-border-radius);
     }
 
-    .card-body a {
-      cursor: pointer;
+    :host:has(.preview-link:focus-visible) {
+      outline: 2px solid var(--doc-link-red, #ff5252);
+      outline-offset: 3px;
+    }
+
+    .featured-image-wrap {
+      border-radius: var(--bs-card-inner-border-radius) var(--bs-card-inner-border-radius) 0 0;
     }
 
     .featured-image {
       display: block;
       width: 100%;
+      height: auto;
       transform: scale(1.035);
       filter: blur(12px) saturate(0.86);
       opacity: 0.78;
@@ -63,16 +84,87 @@ import { post } from '../../../models/post-model';
       opacity: 1;
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .featured-image {
-        transition: none;
-      }
+    :host(:hover) .featured-image.image-loaded {
+      transform: scale(1.03);
+    }
+
+    .preview-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      padding: 1.25rem 1.25rem 1.4rem;
+    }
+
+    .preview-title {
+      font-family: "Barlow", sans-serif;
+      font-weight: 700;
+      font-size: 1.35rem;
+      line-height: 1.25;
+      text-wrap: balance;
+      margin: 0 0 0.35rem;
+    }
+
+    .preview-link {
+      font-weight: inherit;
+      color: var(--doc-link-red, #ff5252);
+      text-decoration: none;
+    }
+
+    .preview-link:focus-visible {
+      outline: none;
+    }
+
+    :host(:hover) .preview-link,
+    .preview-link:focus-visible {
+      text-decoration: underline;
+      text-underline-offset: 0.18em;
+      text-decoration-thickness: 2px;
+    }
+
+    .preview-meta {
+      font-size: 0.85rem;
+      margin: 0 0 0.9rem;
+    }
+
+    .preview-excerpt {
+      margin-bottom: 1.25rem;
+    }
+
+    .preview-byline {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      margin-top: auto;
+      padding-left: 0.85rem;
+      border-left: 3px solid var(--doc-link-red, #ff5252);
+    }
+
+    .preview-avatar {
+      border-radius: 45%;
+      flex-shrink: 0;
+    }
+
+    .preview-author {
+      display: block;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .preview-tier {
+      display: block;
+      font-size: 0.85rem;
+    }
+
+    :host-context(html.reduce-motion) .featured-image {
+      transition: none;
     }
   `]
 })
 export class PostPreviewer {
   @Input() post!: post;
   @Input() cropFeaturedImage: boolean = false;
+  @Input() headingLevel: 2 | 3 = 2;
+  readonly cardImageSizes = '(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 360px';
   private loadedImageKeys = new Set<string>();
   private fallbackByPostId = new Map<number, string>();
 

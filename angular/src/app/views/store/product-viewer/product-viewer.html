@@ -1,8 +1,8 @@
 <div class="card paper px-0 mb-4 mx-auto" style="filter: none;">
     <div class="card-body p-sm-2 p-md-5">
         <div class="d-flex align-items-center mb-1">
-            <a [routerLink]="['/merch']" class="button-store-back">
-                &larr;
+            <a [routerLink]="['/merch']" class="button-store-back" aria-label="Back to merch">
+                <span aria-hidden="true">&larr;</span>
             </a>
             <h1 class="oblique cursor-default mb-0 flex-grow-1">
                 @if (loading()) {
@@ -53,30 +53,35 @@
                     <div class="main-image-wrap" [class.fading]="imageFading()">
                         <product-image
                             [imageSrc]="mainImageUrl()"
-                            [altText]="product()!.sync_product.name"
+                            [altText]="product()!.sync_product.name + ', ' + angleLabel(selectedAngleIndex()) + ' view'"
                             (overImage)="isOverProduct = $event"
                             (imageClick)="lightboxOpen = true"
                             (loaded)="onProductImageLoaded()">
                         </product-image>
                     </div>
+                    @if (lightboxImages().length) {
+                        <button type="button" class="btn btn-sm btn-secondary visually-hidden-focusable mt-2" (click)="lightboxOpen = true">
+                            View larger images
+                        </button>
+                    }
 
                     @if (thumbnailUrls().length > 1) {
-                        <div class="thumb-strip d-flex gap-2 mt-3 flex-wrap">
+                        <div class="thumb-strip d-flex gap-2 mt-3 flex-wrap" role="group" aria-label="Product views">
                             @for (thumb of thumbnailUrls(); track $index) {
-                                <img
-                                    [src]="thumb"
-                                    [alt]="product()!.sync_product.name"
-                                    [class.active]="selectedAngleIndex() === $index"
-                                    (click)="selectAngle($index)">
+                                <button type="button" class="thumb-btn" (click)="selectAngle($index)"
+                                    [attr.aria-label]="'Show ' + angleLabel($index) + ' view'"
+                                    [attr.aria-pressed]="selectedAngleIndex() === $index">
+                                    <img [src]="thumb" alt="" [class.active]="selectedAngleIndex() === $index">
+                                </button>
                             }
                         </div>
                     }
                 </div>
 
                 <div class="col-12 col-md-7 d-flex flex-column">
-                    <h6 class="cursor-default mb-3">
+                    <p class="h6 cursor-default mb-3">
                         {{ product()!.sync_product.name }}
-                    </h6>
+                    </p>
                     @if (product()!.sync_product.description) {
                         <p class="mb-3">{{ product()!.sync_product.description }}</p>
                     }
@@ -113,6 +118,8 @@
     <app-lightbox
         [images]="lightboxImages()"
         [startIndex]="selectedAngleIndex()"
+        [label]="product()!.sync_product.name + ' images'"
+        [alt]="product()!.sync_product.name"
         (close)="lightboxOpen = false">
     </app-lightbox>
 }

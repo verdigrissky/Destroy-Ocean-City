@@ -4,6 +4,10 @@
 .DS_Store
 Thumbs.db
 
+# MD
+API-HARDENING.md
+MOVE-TO-R2.md
+
 # Garbage
 /.claude
 /angular/.angular

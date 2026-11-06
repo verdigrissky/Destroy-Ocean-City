@@ -1,23 +1,21 @@
-// Bootstrap Color Utilities
+
 $primary: #E05252;
-$secondary: #c3c3c3;
+$secondary: #b8bcc4;
 $success: #B4DC7F;
 $info: #A1A1A1;
 $warning: #C6A41C;
 $danger: #D51414;
-$body-bg: #000000;
-$body-color: #f8f9fa;
-$dark: #000000;
+$body-bg: #1e1f23;
+$body-color: #e9ecef;
+$dark: #141518;
+$primary-text: #FF7A7A;
 
-// Bootstrap Card Utilities
-$card-bg: #111111;
+$card-bg: #2a2b30;
 $card-color: $body-color;
-$card-border-color: #333333;
+$card-border-color: #3a3c42;
 
-// Other Bootstrap Utilites
 $border-radius: 0.5rem;
 
-// Bootstrap Mixin
 @use "bootstrap/scss/bootstrap" with (
   $primary: $primary,
   $secondary: $secondary,
@@ -31,55 +29,63 @@ $border-radius: 0.5rem;
   $dark: $dark,
   $card-bg: $card-bg,
   $card-color: $card-color,
-  $card-border-color: $card-border-color
+  $card-border-color: $card-border-color,
+  $link-color: $primary-text
 );
 
-// Theme CSS custom properties
+.text-primary { color: $primary-text !important; }
+.link-primary,
+.link-primary:hover,
+.link-primary:focus { color: $primary-text !important; }
+
 :root {
-  --doc-skeleton-bg: rgba(255, 255, 255, 0.07);
-  --doc-shimmer-peak: rgba(255, 255, 255, 0.22);
-  --btn-edge-1: rgba(255, 255, 255, 0.14);
-  --btn-edge-2: rgba(255, 255, 255, 0.10);
-  --btn-edge-3: rgba(255, 255, 255, 0.06);
-  --btn-edge-4: rgba(255, 255, 255, 0.03);
-  --btn-ambient: rgba(0, 0, 0, 0.75);
-  --btn-ambient-hover: rgba(0, 0, 0, 0.85);
-  --btn-press-inset: rgba(0, 0, 0, 0.55);
-  --product-card-shadow: 0px 10px 24px rgba(30, 30, 30, 0.9);
+  color-scheme: dark;
+  --doc-oblique-color: #F1F3F5;
+  --doc-oblique-shadow-1: hsl(220, 5%, 50%);
+  --doc-oblique-shadow-2: hsl(220, 5%, 34%);
+  --doc-link-red: #{$primary-text};
+  --doc-skeleton-bg: rgba(255, 255, 255, 0.08);
+  --doc-shimmer-peak: rgba(255, 255, 255, 0.18);
+  --btn-edge-1: rgba(0, 0, 0, 0.40);
+  --btn-edge-2: rgba(0, 0, 0, 0.30);
+  --btn-edge-3: rgba(0, 0, 0, 0.20);
+  --btn-edge-4: rgba(0, 0, 0, 0.10);
+  --btn-ambient: rgba(0, 0, 0, 0.45);
+  --btn-ambient-hover: rgba(0, 0, 0, 0.55);
+  --btn-press-inset: rgba(0, 0, 0, 0.45);
+  --product-card-shadow: 0px 10px 24px rgba(0, 0, 0, 0.55);
 }
 
-// Theme Specific Rules
 .paper {
   max-width: 1024px;
-  background-color: #111111;
-  filter: drop-shadow(0px 0px 15px rgb(45, 45, 45));
+  background-color: $card-bg;
+  filter: drop-shadow(0px 0px 15px rgb(12, 12, 14));
 }
 .oblique {
-	color: #F8F9FA;
+	color: #F1F3F5;
   transition-duration: 0.2s;
   text-shadow:
-    0 1px 0 hsl(0, 0%, 58%),
-    0 4px 0 hsl(0, 0%, 46%);
+    0 1px 0 hsl(220, 5%, 50%),
+    0 4px 0 hsl(220, 5%, 34%);
 }
 .oblique-secondary {
   text-shadow:
-    0 1px 0 hsl(0, 0%, 40%),
-	  0 3px 0 hsl(0, 0%, 35%);
+    0 1px 0 hsl(220, 5%, 32%),
+	  0 3px 0 hsl(220, 5%, 26%);
 }
 .oblique-author {
-  color: $primary;
+  color: $primary-text;
   text-shadow:
-      0 1px 0 hsl(0, 40%, 50%),
-	    0 4px 0 hsl(0, 35%, 35%),
+      0 1px 0 hsl(0, 35%, 42%),
+	    0 4px 0 hsl(0, 30%, 30%),
 }
 .post-card {
-  filter: drop-shadow(0px 0px 15px rgb(45, 45, 45));
+  filter: drop-shadow(0px 0px 15px rgb(12, 12, 14));
 }
 .version-text {
-  color: #323232;
+  color: #8a8d94;
 }
 
-// Skeuomorphic btn overrides (must follow Bootstrap's compiled .btn to win the cascade)
 .btn {
   transform: translateY(0);
   transition:

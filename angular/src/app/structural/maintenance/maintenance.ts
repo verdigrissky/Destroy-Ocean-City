@@ -1,13 +1,13 @@
 import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { BackendStatus } from '../../services/maintenance-service';
+import { Logo } from '../../shared/logo';
 
 @Component({
   selector: 'doc-maintenance',
+  imports: [ Logo ],
   template: `
   <main class="maintenance" role="alert" aria-live="assertive">
-    <span class="destroyOceanCityLogo maintenance-logo">
-      <span class="destroy">Destroy</span>&nbsp;<span class="ocean-city">Ocean City!</span>
-    </span>
+    <doc-logo class="maintenance-logo"></doc-logo>
     <p class="maintenance-message">
       @if (status() === 'maintenance') {
         Our servers are currently being inspected for structural windmill damage.
@@ -34,10 +34,7 @@ import { BackendStatus } from '../../services/maintenance-service';
       text-align: center;
     }
     .maintenance-logo {
-      margin-right: 0;
-      cursor: default;
       font-size: clamp(2rem, 8vw, 5rem);
-      line-height: 1.2;
     }
     .maintenance-message {
       color: #f0f0f0;

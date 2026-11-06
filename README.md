@@ -4,7 +4,7 @@ Sometimes you must destroy what you love to really save it.
 
 See the current production build at [Destroy Ocean City](https://destroyocean.city).
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.6 and upgraded to version 21.4.2.
+This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.6 and is currently on Angular 22.2.3 (app version 2.3).
 
 ## Prepare your Environment
 
@@ -32,6 +32,18 @@ npm start
 
 Once the server is running, open your browser and navigate to `http://localhost:4400/`. The application will automatically reload whenever you modify any of the source files.
 
+Development builds also include a `/test` page (also reachable at `/debug`) with sample alerts, headings and cards for checking styles. It is left out of production builds entirely.
+
+## Running Tests
+
+Unit tests run with [Vitest](https://vitest.dev) in a jsdom environment, so no browser is needed. Run the following in `/angular`:
+
+```bash
+npm test
+```
+
+Use `npm test -- --watch=false` for a single run.
+
 ## Building
 
 To build the project, run the following in /angular:
@@ -55,6 +67,22 @@ Then, you can use the following command within /angular to automate pushing buil
 ```bash
 ./deploy.sh
 ```
+
+## Themes and Reduced Motion
+
+The site has three color themes, chosen from the header's theme menu:
+
+| Theme | Look | Source |
+| --- | --- | --- |
+| Light | Light gray background | `src/bs-custom-light.scss` |
+| Dark | Charcoal | `src/bs-custom-dark.scss` |
+| Black | Pure black | `src/bs-custom-black.scss` |
+
+Each theme compiles to its own stylesheet (`theme-light.css`, `theme-dark.css`, `theme-black.css`). Only the active one is loaded. The default setting, Automatic, follows the device: Light, or Dark when the device prefers a dark color scheme. A visitor's choice is saved in `localStorage`.
+
+A small script at the top of `<body>` in `src/index.html` picks the theme before the app starts, so the page never flashes the wrong colors. It must stay in step with `src/app/services/theme-service.ts`, which handles switching after load.
+
+The same menu has a **Reduce motion** toggle. It starts on when the device has the reduced-motion accessibility setting turned on. When on, the `reduce-motion` class on `<html>` stops animations and transitions, the rotating slogans stay still, and scrolling jumps instead of gliding.
 
 ## Backend Outages and Maintenance Mode
 
@@ -91,7 +119,7 @@ This should return `HTTP/2 503`, `access-control-allow-origin: https://destroyoc
 
 For more information on using the Angular CLI, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 
-For references to Angular 20, visit the [Angular 20 Reference](https://angular.dev) guide.
+For references to Angular, visit the [Angular documentation](https://angular.dev).
 
-For help with Bootstrap 4.1 utilities, visit [Bootstrap Getting Started](https://getbootstrap.com/docs/4.1/getting-started/introduction/).
+For help with Bootstrap 5.3 utilities, visit [Bootstrap Getting Started](https://getbootstrap.com/docs/5.3/getting-started/introduction/).
 

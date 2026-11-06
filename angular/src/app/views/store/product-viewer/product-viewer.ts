@@ -59,7 +59,14 @@ function buildImageUrl(slug: string, angle: string, size: 'full' | '600' | '50')
     .thumb-strip {
       justify-content: center;
     }
+    .thumb-btn {
+      background: none;
+      border: 0;
+      padding: 0;
+      border-radius: 0.25rem;
+    }
     .thumb-strip img {
+      display: block;
       width: 50px;
       height: 50px;
       object-fit: contain;
@@ -68,7 +75,8 @@ function buildImageUrl(slug: string, angle: string, size: 'full' | '600' | '50')
       border-radius: 0.25rem;
       transition: transform 0.5s, filter 0.5s, border-color 0.15s;
     }
-    .thumb-strip img:hover:not(.active) {
+    .thumb-btn:hover img:not(.active),
+    .thumb-btn:focus-visible img:not(.active) {
       transform: translateY(-5px);
     }
     .thumb-strip img.active {
@@ -94,7 +102,6 @@ export class ProductViewer implements OnInit, OnDestroy {
     if (this.loadTimeout) { clearTimeout(this.loadTimeout); this.loadTimeout = null; }
     setTimeout(() => {
       this.selectedAngleIndex.set(index);
-      // imageFading cleared by onProductImageLoaded(); safety fallback after 5s
       this.loadTimeout = setTimeout(() => this.onProductImageLoaded(), 5000);
     }, 250);
   }
@@ -105,6 +112,10 @@ export class ProductViewer implements OnInit, OnDestroy {
   }
 
   private localImages = computed(() => this.product()?.sync_product.images ?? []);
+
+  angleLabel(index: number): string {
+    return (this.localImages()[index] ?? 'product').replace(/[-_]+/g, ' ');
+  }
   private productSlug = computed(() => this.product()?.sync_product.slug ?? '');
 
   mainImageUrl = computed(() => {

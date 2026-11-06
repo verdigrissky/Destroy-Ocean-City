@@ -1,11 +1,16 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, effect, inject } from '@angular/core';
 import localProducts from '../data/products.json';
 import slogansData from '../data/slogans.json';
+import { ThemeService } from './theme-service';
 
 @Injectable({ providedIn: 'root' })
 export class SloganatorService {
 
   readonly displayText = signal<string>('');
+  readonly fullText = signal<string>('');
+
+  private theme = inject(ThemeService);
+  private wasReduced = this.theme.reducedMotion();
 
   private slogans: string[] = [...localProducts.genericContent.slogans];
   private appSlogans: string[] = [...slogansData.slogans.appSloganator];
@@ -20,10 +25,19 @@ export class SloganatorService {
 
   constructor() {
     this.startTyping();
+
+    effect(() => {
+      const reduced = this.theme.reducedMotion();
+      if (reduced === this.wasReduced) return;
+      this.wasReduced = reduced;
+      if (reduced) {
+        this.settle();
+      } else if (!this.waiting) {
+        this.timeout = setTimeout(() => this.eraseStep(), 3500);
+      }
+    });
   }
 
-  // Call immediately on navigation — erases whatever is on screen right now.
-  // If slogans aren't known yet (product page), waits for transitionTo() to supply them.
   beginErase(): void {
     if (this.transitioning || this.waiting) return;
     this.clearTimer();
@@ -32,8 +46,6 @@ export class SloganatorService {
     this.eraseStep();
   }
 
-  // Supply the slogans to type next. If erasing is already in progress (from beginErase),
-  // just stores them for pickup. If waiting (erase already done), starts immediately.
   transitionTo(slogans: string[]): void {
     this.pendingSlogans = [...slogans];
     if (this.waiting) {
@@ -44,10 +56,10 @@ export class SloganatorService {
       this.transitioning = true;
       this.eraseStep();
     }
-    // if transitioning: pendingSlogans updated, picked up when erase completes
   }
 
   private applyPendingAndStart(): void {
+    if (this.theme.reducedMotion()) { this.settle(); return; }
     if (this.pendingSlogans) {
       this.slogans = [...this.pendingSlogans];
       this.pendingSlogans = null;
@@ -59,11 +71,13 @@ export class SloganatorService {
 
   private startTyping(): void {
     this.targetText = this.pickNext();
+    this.fullText.set(this.targetText);
     this.currentText = '';
     this.typeStep();
   }
 
   private typeStep(): void {
+    if (this.theme.reducedMotion()) { this.settle(); return; }
     if (this.currentText.length < this.targetText.length) {
       this.currentText = this.targetText.slice(0, this.currentText.length + 1);
       this.displayText.set(this.currentText);
@@ -74,6 +88,7 @@ export class SloganatorService {
   }
 
   private eraseStep(): void {
+    if (this.theme.reducedMotion()) { this.settle(); return; }
     if (this.currentText.length > 0) {
       this.currentText = this.currentText.slice(0, -1);
       this.displayText.set(this.currentText);
@@ -82,12 +97,35 @@ export class SloganatorService {
       if (this.pendingSlogans) {
         this.applyPendingAndStart();
       } else {
-        this.waiting = true; // slogans not yet known, hold here until transitionTo() is called
+        this.waiting = true;
       }
     } else {
-      // normal cycle — keep going with current slogans
       this.timeout = setTimeout(() => this.startTyping(), 500);
     }
+  }
+
+  private settle(): void {
+    this.clearTimer();
+    if (this.pendingSlogans) {
+      this.slogans = [...this.pendingSlogans];
+      this.pendingSlogans = null;
+      this.recentIndices = [];
+      this.transitioning = false;
+      this.waiting = false;
+      this.targetText = this.pickNext();
+    } else if (this.transitioning || this.waiting) {
+      this.transitioning = false;
+      this.waiting = true;
+      this.currentText = '';
+      this.displayText.set('');
+      this.fullText.set('');
+      return;
+    } else if (!this.targetText) {
+      this.targetText = this.pickNext();
+    }
+    this.currentText = this.targetText;
+    this.displayText.set(this.currentText);
+    this.fullText.set(this.targetText);
   }
 
   private clearTimer(): void {

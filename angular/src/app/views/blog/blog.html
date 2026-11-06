@@ -31,10 +31,16 @@
     </div>
   </article>
 } @else if (post(); as isolatedPost) {
-  <!-- Single Post View -->
-  <postViewer [post]="isolatedPost"></postViewer>
+  <postViewer [post]="isolatedPost" [showBlogNav]="true" [previousPost]="previousPost()" [nextPost]="nextPost()"></postViewer>
+} @else if (postNotFound()) {
+  <article class="card paper px-0 mb-4 mx-auto">
+    <div class="card-body p-sm-2 p-md-5 text-center">
+      <h1 class="oblique cursor-default">Post not found</h1>
+      <p>This post may have moved, or the link may be mistyped.</p>
+      <a routerLink="/blog" class="btn btn-primary text-white mt-2">See all posts</a>
+    </div>
+  </article>
 } @else {
-  <!-- Promoted Posts List -->
   <h1 class="cursor-default oblique blog-heading" [innerHTML]="heading"></h1>
   <div class="row blog-toolbar">
     <div class="col-12 align-items-center">

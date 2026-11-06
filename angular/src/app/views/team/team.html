@@ -3,9 +3,9 @@
         <h1 class="oblique cursor-default">
             Meet the Heroes
         </h1>
-        <h5 class="text-primary">
+        <p class="h5 text-primary">
             These fine locals have taken up the mantle to keep Ocean City windmill free!
-        </h5>
+        </p>
         <hr>
         <div class="row row-gap-4">
             @if (isLoading()) {
@@ -42,16 +42,16 @@
                             <div class="card-body">
                                 <div class="hero-intro-container">
                                     <div class="hero-photo-container">
-                                        <button type="button" class="hero-photo-button" (click)="openLightbox(hero.media.source_url)" [attr.aria-label]="'View photo of ' + hero.name">
+                                        <button type="button" class="hero-photo-button" (click)="openLightbox(hero)" [attr.aria-label]="'View photo of ' + hero.name">
                                             <img [src]="hero.media.source_url" [alt]="hero.media.alt_text || hero.name" class="hero-photo">
                                             <span class="hero-photo-hint monospace">View</span>
                                         </button>
                                     </div>
                                     <div class="hero-title-container">
-                                        <span>
-                                            <h5 class="text-primary hero-title-text">{{ hero.name }}</h5>
-                                            <h6 class="text-secondary hero-title-text">{{ hero.tier }}</h6>
-                                        </span>
+                                        <div>
+                                            <h2 class="h5 text-primary hero-title-text">{{ hero.name }}</h2>
+                                            <p class="h6 text-secondary hero-title-text">{{ hero.tier }}</p>
+                                        </div>
                                     </div>
                                 </div>
                                 <div [innerHTML]="hero.excerpt | safeHtml"></div>
@@ -62,7 +62,7 @@
                                 </div>
                             </div>
                             <div class="card-footer">
-                                <h6>Fact Sheet</h6>
+                                <h3 class="h6">Fact Sheet</h3>
                                 <ul class="list-group mb-2">
                                     @for (fact of hero.facts; track $index) {
                                         <li class="list-group-item">{{ fact }}</li>
@@ -77,13 +77,6 @@
     </div>
 </div>
 
-@if (lightboxImageSrc(); as src) {
-    <div class="hero-lightbox-backdrop" (click)="closeLightbox()" role="dialog" aria-modal="true" aria-label="Hero photo lightbox">
-        <div class="hero-lightbox-frame" (click)="$event.stopPropagation()">
-            <button type="button" class="hero-lightbox-close" (click)="closeLightbox()" aria-label="Close photo">
-                <i class="bi bi-x-lg"></i>
-            </button>
-            <img [src]="src" class="hero-lightbox-image" alt="Hero photo full size">
-        </div>
-    </div>
+@if (lightboxHero(); as hero) {
+    <app-lightbox [images]="[hero.media.source_url]" [label]="'Photo of ' + hero.name" [alt]="hero.media.alt_text || hero.name" (close)="closeLightbox()"></app-lightbox>
 }

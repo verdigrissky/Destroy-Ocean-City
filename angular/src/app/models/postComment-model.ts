@@ -8,13 +8,4 @@ export interface postComment {
   content: {
     rendered: string;
   };
-  _embedded?: {
-    author?: {
-      id: number;
-      name: string;
-      avatar_urls: {
-        [size: string]: string;
-      };
-    }[];
-  };
 }

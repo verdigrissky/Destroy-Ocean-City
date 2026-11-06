@@ -15,7 +15,6 @@ export class OrdinalDatePipe implements PipeTransform {
     const day = date.getDate();
     const ordinalDay = this.getOrdinalDay(day);
 
-    // Format without the day component, then add ordinal day manually
     const dayOfWeek = this.datePipe.transform(date, 'EEEE') || '';
     const month = this.datePipe.transform(date, 'MMMM') || '';
 

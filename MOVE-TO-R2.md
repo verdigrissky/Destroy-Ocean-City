@@ -61,14 +61,17 @@ Create `angular/public/_headers`. Angular copies everything in `public/` into th
 /*.js
   Cache-Control: public, max-age=31536000, immutable
 
-/*.css
+/styles-*.css
   Cache-Control: public, max-age=31536000, immutable
+
+/theme-*.css
+  Cache-Control: no-cache
 
 /media/*
   Cache-Control: public, max-age=31536000, immutable
 ```
 
-`theme-light.css` and `theme-dark.css` are **not** hashed. If they'll change between deploys, add a shorter rule for them above the `/*.css` rule, or have Angular hash them.
+`theme-light.css`, `theme-dark.css` and `theme-black.css` are **not** hashed: `index.html` loads them by fixed name before the app starts. `no-cache` still lets browsers keep them, but makes them check for a newer copy on each visit. That check is a cheap `304` when nothing changed. Don't use a broad `/*.css` immutable rule, or visitors could keep an old theme indefinitely.
 
 ## 3. Add a deploy script
 
@@ -152,6 +155,125 @@ Only after the domain has served from the Worker for a day or so:
 3. Delete `angular/deploy.sh` and remove `angular-deploy/` from the repo.
 4. Update the **Building** and **Automatic Deployment with Github Connect** sections of `README.md` to describe `npm run deploy`.
 5. GitHub → **Settings → General → Danger Zone → Change visibility → Private**.
+
+## 7. Link previews for blog posts
+
+When a post link is shared on social media or in a messaging app, the preview is blank: no title, image or summary. Those crawlers don't run JavaScript, and every page's HTML is the same empty `index.html` until Angular boots. Once the site is on a Worker, there are two ways to fix this.
+
+### Option A (recommended): inject the tags in the Worker
+
+A small Worker script runs before the static assets for `/blog/*`. It looks up the post, then rewrites `index.html` on the way out with `HTMLRewriter`, setting `<title>` and the `og:`/`twitter:` tags. The Angular app is untouched, new posts get previews immediately with no rebuild, and every other route is still served as static assets.
+
+1. Change `angular/wrangler.jsonc` so the Worker runs first for blog URLs:
+
+   ```jsonc
+   {
+     "name": "destroyoceancity-site",
+     "main": "worker/index.ts",
+     "compatibility_date": "2026-10-21",
+     "assets": {
+       "directory": "./dist/destroyOceanCity",
+       "binding": "ASSETS",
+       "not_found_handling": "single-page-application",
+       "run_worker_first": ["/blog/*"]
+     },
+     "routes": [
+       { "pattern": "destroyocean.city", "custom_domain": true },
+       { "pattern": "www.destroyocean.city", "custom_domain": true }
+     ]
+   }
+   ```
+
+2. Add `angular/worker/index.ts`:
+
+   ```ts
+   interface Env { ASSETS: Fetcher }
+
+   const API = 'https://api.destroyocean.city/json';
+   const SITE = 'https://destroyocean.city';
+
+   export default {
+     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+       const url = new URL(request.url);
+       const page = await env.ASSETS.fetch(new Request(new URL('/index.html', url), request));
+       const slug = url.pathname.match(/^\/blog\/([^/]+)\/?$/)?.[1];
+       if (!slug || slug === 'author') return page;
+
+       const post = await lookUpPost(slug, ctx);
+       if (!post) return page;
+
+       const meta = (property: string, content: string) =>
+         `<meta property="${property}" content="${escapeAttr(content)}">`;
+       const tags = [
+         meta('og:type', 'article'),
+         meta('og:site_name', 'DESTROY OCEAN CITY!'),
+         meta('og:title', post.title),
+         meta('og:description', post.description),
+         meta('og:url', `${SITE}/blog/${slug}`),
+         post.image ? meta('og:image', post.image) : '',
+         `<meta name="twitter:card" content="${post.image ? 'summary_large_image' : 'summary'}">`,
+         `<meta name="description" content="${escapeAttr(post.description)}">`,
+       ].join('');
+
+       return new HTMLRewriter()
+         .on('title', { element: el => { el.setInnerContent(`DOC! ${post.title}`); } })
+         .on('head', { element: el => { el.append(tags, { html: true }); } })
+         .transform(page);
+     },
+   };
+
+   // Cached at the edge for 10 minutes so crawlers don't hit the backend on every share
+   async function lookUpPost(slug: string, ctx: ExecutionContext) {
+     const apiUrl = `${API}/posts?slug=${encodeURIComponent(slug)}&_embed`;
+     const res = await fetch(apiUrl, {
+       headers: { Origin: SITE },
+       cf: { cacheTtl: 600, cacheEverything: true },
+     });
+     if (!res.ok) return null;
+     const [p] = await res.json<any[]>();
+     if (!p) return null;
+     const media = p._embedded?.media?.[0];
+     return {
+       title: plain(p.title.rendered),
+       description: plain(p.excerpt.rendered).slice(0, 200),
+       image: media?.media_details?.sizes?.large?.source_url ?? media?.media_details?.sizes?.medium_large?.source_url ?? media?.source_url ?? null,
+     };
+   }
+
+   // Strip tags and decode the common entities the CMS emits
+   function plain(html: string): string {
+     return html.replace(/<[^>]*>/g, '')
+       .replace(/&#8217;|&#039;/g, "'").replace(/&#8220;|&#8221;|&quot;/g, '"')
+       .replace(/&#8211;/g, '–').replace(/&#8212;/g, '—').replace(/&hellip;|&#8230;/g, '…')
+       .replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+   }
+
+   function escapeAttr(value: string): string {
+     return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+   }
+   ```
+
+3. Check that the API allows this server-side request. It sends `Origin: https://destroyocean.city`, but nginx may filter on more than that. If the CMS façade from `API-HARDENING.md` exists by then, read from that instead of the raw API.
+4. Deploy, then check what a crawler sees:
+
+   ```bash
+   curl -s https://destroyocean.city/blog/killing-two-birds-with-one-windmill | grep -E 'og:|<title>'
+   ```
+
+   Then paste a post URL into a preview tool, such as the opengraph.xyz debugger or a private message to yourself.
+
+The Worker only touches `/blog/<slug>`. The author pages, the blog index, and every other route are still served as static assets. When the backend is down or the post doesn't exist, the plain `index.html` goes out unchanged, and the app's maintenance and not-found screens take over as usual.
+
+### Option B: prerender every post at build time
+
+Angular can render each post to real HTML during `ng build` (`ng add @angular/ssr`, `outputMode: "static"`, and a `getPrerenderParams` that fetches every slug). That gives crawlers the full article text, not just the preview tags. But it's a much bigger change for this app:
+
+- `ThemeService`, `MaintenanceService`, the sloganator and the lightbox touch `window`, `document` and `localStorage` at startup. Each needs a browser-only guard before the build can render anything.
+- The startup API check would run during the build. If the API is down at build time, every page would be prerendered as the maintenance screen.
+- The sanitizer (DOMPurify) and `plainText()` rely on a browser DOM. They need server-safe versions.
+- A new post has no prerendered page until the next deploy. It still works through the SPA fallback, but without a preview.
+
+Prerendering mainly helps search engines index the full article text; link previews only need the tags. So use Option A unless search ranking becomes a goal.
 
 ## Rollback
 

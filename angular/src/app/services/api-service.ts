@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, Observable, throwError, switchMap, of } from 'rxjs';
+import { catchError, forkJoin, Observable, throwError, switchMap, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AlertService } from './alert-service';
 import { MaintenanceService } from './maintenance-service';
-import { post } from '../models/post-model';
+import { adjacentPost, post } from '../models/post-model';
 import { postComment } from '../models/postComment-model';
 import { hero } from '../models/hero-model';
 
@@ -31,17 +31,25 @@ export class ApiService {
       );
   }
 
-  getPostBySlug(slug: string): Observable<{ post: post, comments: postComment[] }> {
+  getPostBySlug(slug: string): Observable<post | null> {
     return this.http
-      .get<post[]>(`${this.backendUrl}/posts?slug=${slug}&_embed`)
+      .get<post[]>(`${this.backendUrl}/posts?slug=${encodeURIComponent(slug)}&categories=${this.promotedBlogId}&_embed`)
       .pipe(
-        switchMap(posts => {
-          const postData = posts[0];
-          return this.http.get<postComment[]>(`${this.backendUrl}/comments?post=${postData.id}&_embed`)
-            .pipe(map(comments => ({ post: postData, comments })));
-        }),
+        map(posts => posts?.[0] ?? null),
         catchError(err => this.handleError(err, `loading post with slug ${slug}.`))
       );
+  }
+
+  getAdjacentPosts(current: post): Observable<{ previous: adjacentPost | null, next: adjacentPost | null }> {
+    const base = `${this.backendUrl}/posts?categories=${this.promotedBlogId}&per_page=1&_fields=slug,title&orderby=date`;
+    const date = encodeURIComponent(current.date);
+    const first = (posts: adjacentPost[]) => posts?.[0] ?? null;
+    return forkJoin({
+      previous: this.http.get<adjacentPost[]>(`${base}&order=desc&before=${date}`).pipe(map(first)),
+      next: this.http.get<adjacentPost[]>(`${base}&order=asc&after=${date}`).pipe(map(first)),
+    }).pipe(
+      catchError(() => of({ previous: null, next: null }))
+    );
   }
 
   getRecentPosts(limit = 3): Observable<post[]> {
@@ -55,7 +63,7 @@ export class ApiService {
 
   getCommentsByPostId(postId: number): Observable<postComment[]> {
     return this.http
-      .get<postComment[]>(`${this.backendUrl}/comments?post=${postId}&_embed&orderby=date&order=asc`)
+      .get<postComment[]>(`${this.backendUrl}/comments?post=${postId}&orderby=date&order=asc`)
       .pipe(
         map(posts => posts || []),
         catchError(err => this.handleError(err, `fetching comments for post ID ${postId}.`))

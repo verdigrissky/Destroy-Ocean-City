@@ -6,6 +6,7 @@ import { Subscription } from 'rxjs';
 import { ApiService } from '../../services/api-service';
 import { AlertService } from '../../services/alert-service';
 import { TitleService } from '../../services/title-service';
+import { ThemeService } from '../../services/theme-service';
 
 // Component Imports
 import { PostViewer } from '../blog/post-viewers/post-viewer';
@@ -50,7 +51,8 @@ export class Content implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private apiService: ApiService,
     private alertService: AlertService,
-    private titleService: TitleService
+    private titleService: TitleService,
+    private theme: ThemeService
   ) {}
 
   ngOnInit() {
@@ -90,9 +92,6 @@ export class Content implements OnInit, OnDestroy {
     );
   }
 
-  // Parses the post HTML and stamps id="item-N" on <p> elements that lack one.
-  // IDs are injected before Angular renders the content so bypassSecurityTrustHtml
-  // in SafeHtmlPipe preserves them through the [innerHTML] binding.
   private withInjectedAnchors(p: post): post {
     const doc = new DOMParser().parseFromString(p.content.rendered, 'text/html');
     let index = 1;
@@ -103,15 +102,13 @@ export class Content implements OnInit, OnDestroy {
     return { ...p, content: { rendered: doc.body.innerHTML } };
   }
 
-  // Waits two frames for Angular to flush [innerHTML], then scrolls to the target
-  // paragraph and applies the focus class (which transitions it to a larger size).
   private scheduleScrollToFragment(fragment: string): void {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         const target = document.getElementById(fragment);
         if (!target) return;
         target.classList.add('content-anchor-focus');
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        target.scrollIntoView({ behavior: this.theme.reducedMotion() ? 'auto' : 'smooth', block: 'start' });
       });
     });
   }

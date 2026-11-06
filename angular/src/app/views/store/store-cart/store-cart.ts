@@ -10,7 +10,6 @@ import { DecimalPipe } from '@angular/common';
 })
 export class StoreCart {
 
-  // TODO: replace with cart service
   productsInCart = signal<{ productId: number, quantity: number }[]>([]);
 
 }
@@ -51,7 +50,6 @@ export class StoreCart {
 })
 export class StoreCartButton {
 
-  // TODO: replace with cart service
   cartTotal = signal<number>(0);
 
 }

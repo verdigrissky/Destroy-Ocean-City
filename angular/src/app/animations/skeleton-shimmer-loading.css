@@ -1,17 +1,9 @@
-/* ──────────────────────────────────────────────────────────────
-   Skeleton / loading animation library
-   Reusable primitives and utilities for all loading states.
-   Relies on --doc-skeleton-bg and --doc-shimmer-peak CSS
-   variables, which are set per-theme in bs-custom-*.scss.
-   ────────────────────────────────────────────────────────────── */
 
 @keyframes sk-shimmer   { to { transform: translateX(100%); } }
 @keyframes sk-settle    { to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes sk-fade-up   { to { opacity: 1; transform: translateY(0); } }
 @keyframes sk-img-shell { to { background-position: -200% 0; } }
 
-/* ── Shimmer sweep ─────────────────────────────────────────────
-   Add .shimmer to any skeleton block for the gliding highlight. */
 .shimmer {
   position: relative;
   overflow: hidden;
@@ -31,11 +23,6 @@
   pointer-events: none;
 }
 
-/* ── Skeleton shape primitives ─────────────────────────────────
-   Compose these with component-specific size/layout classes.
-   .sk-line   — short text-line placeholder
-   .sk-box    — rectangular block placeholder
-   .sk-circle — circular placeholder (avatar, icon, etc.) */
 .sk-line {
   height: 0.9rem;
   border-radius: 0.4rem;
@@ -51,10 +38,6 @@
   background: var(--doc-skeleton-bg);
 }
 
-/* ── Card / item entrance ──────────────────────────────────────
-   Apply .sk-settle to a skeleton card or a revealed content card.
-   Set --reveal-delay (e.g. style="--reveal-delay:120ms") to stagger
-   a sequence of items. */
 .sk-settle {
   opacity: 0;
   transform: translateY(12px) scale(0.985);
@@ -63,9 +46,6 @@
   overflow: hidden;
 }
 
-/* ── Container / heading entrance ─────────────────────────────
-   Apply .sk-fade-up to headings or loading containers.
-   Also supports --reveal-delay for offset timing. */
 .sk-fade-up {
   opacity: 0;
   transform: translateY(10px);
@@ -73,10 +53,6 @@
   animation-delay: var(--reveal-delay, 0ms);
 }
 
-/* ── Featured image loading shell ─────────────────────────────
-   Wraps an <img> to show an animated shell while the src loads.
-   Add .image-loading to show the shimmer overlay; swap it for
-   .image-loaded (on the <img>) via (load) to reveal the image. */
 .sk-img-wrap {
   position: relative;
   overflow: hidden;
@@ -99,18 +75,14 @@
   pointer-events: none;
 }
 
-/* ── Accessibility ─────────────────────────────────────────────
-   All motion is disabled for users who prefer reduced motion. */
-@media (prefers-reduced-motion: reduce) {
-  .shimmer::after,
-  .sk-img-wrap,
-  .sk-img-wrap.image-loading::after {
-    animation: none;
-  }
-  .sk-settle,
-  .sk-fade-up {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
+html.reduce-motion .shimmer::after,
+html.reduce-motion .sk-img-wrap,
+html.reduce-motion .sk-img-wrap.image-loading::after {
+  animation: none;
+}
+html.reduce-motion .sk-settle,
+html.reduce-motion .sk-fade-up {
+  animation: none;
+  opacity: 1;
+  transform: none;
 }

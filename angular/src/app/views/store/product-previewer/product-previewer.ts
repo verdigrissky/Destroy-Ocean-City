@@ -73,7 +73,7 @@ const IMAGE_BASE = 'https://images.destroyocean.city/products';
         }
       </div>
       <div class="card-body d-flex flex-column">
-        <h6 class="card-title fw-semibold">{{ product()!.name }}</h6>
+        <h2 class="h6 card-title fw-semibold">{{ product()!.name }}</h2>
         <p class="card-text text-muted small mt-auto">
           {{ product()!.variants }} {{ product()!.variant ?? 'variant' }}{{ product()!.variants !== 1 ? 's' : '' }}
         </p>

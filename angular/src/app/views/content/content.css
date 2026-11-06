@@ -48,10 +48,8 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .content-loading {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
+:host-context(html.reduce-motion) .content-loading {
+  animation: none;
+  opacity: 1;
+  transform: none;
 }

@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-not-found',
-  imports: [],
+  imports: [ RouterLink ],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './not-found.html'
 })

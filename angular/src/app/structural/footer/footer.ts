@@ -19,12 +19,12 @@ import { version } from '../../../../package.json';
           </p>
         </div>
         <div class="col-md-4 d-flex align-items-center gap-2 justify-content-end">
-          <span class="south-link mr-2" [routerLink]="['/content/press']">
-            <i class="bi bi-camera"></i>&nbsp;Press Kit
-          </span>
-          <span class="south-link" [routerLink]="['/privacy']">
-            <i class="bi bi-shield-check"></i>&nbsp;Privacy
-          </span>
+          <a class="south-link mr-2" [routerLink]="['/content/press']">
+            <i class="bi bi-camera" aria-hidden="true"></i>&nbsp;Press Kit
+          </a>
+          <a class="south-link" [routerLink]="['/privacy']">
+            <i class="bi bi-shield-check" aria-hidden="true"></i>&nbsp;Privacy
+          </a>
         </div>
       </div>
     </div>
@@ -33,8 +33,10 @@ import { version } from '../../../../package.json';
   changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     .south-link {
-      color: #ff5252;
+      color: var(--doc-link-red, #ff5252);
       cursor: pointer;
+      font-weight: 400;
+      text-decoration: none;
     }
   `
 })

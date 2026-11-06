@@ -1,15 +1,16 @@
-import { Component, HostListener, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { ApiService } from '../../services/api-service';
 import { IdentityService } from '../../services/identity-service';
 import { TitleService } from '../../services/title-service';
 import { SafeHtmlPipe } from '../../pipes/safe-html.pipe';
+import { LightboxComponent } from '../../shared/lightbox';
 import { hero } from '../../models/hero-model';
 
 @Component({
   selector: 'app-team',
-  imports: [ SafeHtmlPipe, RouterLink ],
+  imports: [ SafeHtmlPipe, RouterLink, LightboxComponent ],
   templateUrl: './team.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   styles:`
@@ -74,51 +75,6 @@ import { hero } from '../../models/hero-model';
     .hero-title-text {
       margin: 0;
     }
-    .hero-lightbox-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 1050;
-      background: rgba(0, 0, 0, 0.76);
-      backdrop-filter: blur(2px);
-      display: grid;
-      place-items: center;
-      padding: 1.25rem;
-      animation: lightbox-fade-in 180ms ease;
-    }
-    .hero-lightbox-frame {
-      width: min(96vw, 600px);
-      max-height: 92vh;
-      position: relative;
-      display: grid;
-      place-items: center;
-    }
-    .hero-lightbox-image {
-      max-width: 100%;
-      max-height: 92vh;
-      object-fit: contain;
-      border-radius: 0.5rem;
-      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.48);
-    }
-    .hero-lightbox-close {
-      position: absolute;
-      top: -0.25rem;
-      right: -0.25rem;
-      width: 2.4rem;
-      height: 2.4rem;
-      border: 0;
-      border-radius: 0.5rem;
-      background: rgba(0, 0, 0, 0.62);
-      color: #fff;
-      line-height: 1;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-    }
-    @keyframes lightbox-fade-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    /* --- Skeleton cards --- */
     .hero-skeleton-card {
       opacity: 0;
       transform: translateY(10px) scale(0.988);
@@ -168,21 +124,19 @@ import { hero } from '../../models/hero-model';
       width: 28%;
       margin-bottom: 0.9rem;
     }
-    /* --- Card reveal on load --- */
     .hero-card-reveal {
       opacity: 0;
       transform: translateY(10px) scale(0.988);
       animation: sk-settle 420ms cubic-bezier(.2, .7, .2, 1) forwards;
       animation-delay: var(--reveal-delay, 0ms);
     }
-    @media (prefers-reduced-motion: reduce) {
-      .hero-photo, .hero-lightbox-backdrop,
-      .hero-card-reveal, .hero-skeleton-card {
-        transition: none;
-        animation: none;
-        opacity: 1;
-        transform: none;
-      }
+    :host-context(html.reduce-motion) .hero-photo,
+    :host-context(html.reduce-motion) .hero-card-reveal,
+    :host-context(html.reduce-motion) .hero-skeleton-card {
+      transition: none;
+      animation: none;
+      opacity: 1;
+      transform: none;
     }
   `
 })
@@ -190,8 +144,7 @@ export class Team implements OnDestroy {
   heroes: hero[] = [];
   isLoading = signal<boolean>(true);
   readonly skeletonCards = [0, 1, 2, 3];
-  lightboxImageSrc = signal<string | null>(null);
-  private priorBodyOverflow = '';
+  lightboxHero = signal<hero | null>(null);
 
   constructor(public api: ApiService, public identity: IdentityService, private titleService: TitleService) { }
 
@@ -208,25 +161,16 @@ export class Team implements OnDestroy {
     });
   }
 
-  openLightbox(src: string): void {
-    this.lightboxImageSrc.set(src);
-    this.priorBodyOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+  openLightbox(hero: hero): void {
+    this.lightboxHero.set(hero);
   }
 
   closeLightbox(): void {
-    this.lightboxImageSrc.set(null);
-    document.body.style.overflow = this.priorBodyOverflow;
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscapeKey(): void {
-    if (this.lightboxImageSrc()) this.closeLightbox();
+    this.lightboxHero.set(null);
   }
 
   ngOnDestroy(): void {
     this.titleService.resetSiteTitle();
-    document.body.style.overflow = this.priorBodyOverflow;
   }
 
 }

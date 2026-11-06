@@ -5,17 +5,40 @@
   <title>DESTROY OCEAN CITY!</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Favicon -->
+  <meta name="theme-color" content="#212529">
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
   <link rel="manifest" href="/site.webmanifest">
-  <!-- GWF Import -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Bowlby+One&family=Space+Grotesk:wght@300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Bowlby+One&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Space+Grotesk:wght@300&display=swap" rel="stylesheet">
 </head>
 <body>
+  <script>
+    (function () {
+      var setting = null, motion = null;
+      try {
+        setting = localStorage.getItem('themeSetting');
+        motion = localStorage.getItem('reduceMotion');
+      } catch (e) {}
+      var legacy = { forceLight: 'light', forceDark: 'black' };
+      if (setting && legacy[setting]) setting = legacy[setting];
+      var theme = (setting === 'light' || setting === 'dark' || setting === 'black')
+        ? setting
+        : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      var reduce = motion ? motion === 'on' : window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var root = document.documentElement;
+      if (reduce) root.classList.add('reduce-motion');
+      var barColors = { light: '#212529', dark: '#141518', black: '#000000' };
+      var pageColors = { light: '#f2f2f2', dark: '#1e1f23', black: '#000000' };
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', barColors[theme]);
+      root.style.backgroundColor = pageColors[theme];
+      document.write('<link id="theme" rel="stylesheet" href="theme-' + theme + '.css"'
+        + ' onload="document.documentElement.style.backgroundColor=\'\'"'
+        + ' onerror="this.onerror=null;this.href=\'theme-light.css\'">');
+    })();
+  </script>
   <doc-root></doc-root>
 </body>
 </html>

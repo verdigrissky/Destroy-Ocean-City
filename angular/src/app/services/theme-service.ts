@@ -1,26 +1,23 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
-type Theme = 'light' | 'dark';
-type ThemeSetting = 'auto' | 'forceLight' | 'forceDark';
+export type Theme = 'light' | 'dark' | 'black';
+export type ThemeSetting = 'auto' | Theme;
+
+const LEGACY_SETTINGS: Record<string, ThemeSetting> = { forceLight: 'light', forceDark: 'black' };
+const THEME_SETTINGS: ThemeSetting[] = ['auto', 'light', 'dark', 'black'];
+const THEME_BAR_COLORS: Record<Theme, string> = { light: '#212529', dark: '#141518', black: '#000000' };
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
     currentTheme = signal <Theme> ('light');
     currentThemeSetting = signal <ThemeSetting> ('auto');
-    private buildToken = this.detectBuildToken();
+    reducedMotion = signal <boolean> (false);
 
     private mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    private motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     constructor() {
-        const savedThemeSetting = localStorage.getItem('themeSetting') as ThemeSetting | null;
-
-        if (savedThemeSetting) {
-            this.setTheme(savedThemeSetting, false);
-
-        } else {
-            this.setTheme('auto', false);
-
-        }
+        this.setTheme(this.savedThemeSetting(), false);
 
         this.mediaQuery.addEventListener('change', () => {
             if (this.currentThemeSetting() === 'auto') {
@@ -29,11 +26,16 @@ export class ThemeService {
             }
         });
 
-        effect(() => {
-            localStorage.setItem('themeSetting', this.currentThemeSetting());
+        const savedMotion = this.readStorage('reduceMotion');
+        this.setReducedMotion(savedMotion ? savedMotion === 'on' : this.motionQuery.matches, false);
 
+        this.motionQuery.addEventListener('change', () => {
+            if (!this.readStorage('reduceMotion')) {
+                this.setReducedMotion(this.motionQuery.matches, false);
+
+            }
         });
-        
+
     }
 
     setTheme(themeSetting: ThemeSetting, persist: boolean = true) {
@@ -43,47 +45,83 @@ export class ThemeService {
             const osTheme: Theme = this.mediaQuery.matches ? 'dark' : 'light';
             this.loadTheme(osTheme);
 
-        } else if (themeSetting === 'forceLight') {
-            this.loadTheme('light');
-
-        } else if (themeSetting === 'forceDark') {
-            this.loadTheme('dark');
+        } else {
+            this.loadTheme(themeSetting);
 
         }
 
         if (persist) {
-            localStorage.setItem('themeSetting', themeSetting);
+            this.writeStorage('themeSetting', themeSetting);
 
         }
 
     }
 
-    private loadTheme(theme: 'light' | 'dark') {
-        const head = document.head;
+    toggleReducedMotion() {
+        this.setReducedMotion(!this.reducedMotion());
+
+    }
+
+    setReducedMotion(reduce: boolean, persist: boolean = true) {
+        this.reducedMotion.set(reduce);
+        document.documentElement.classList.toggle('reduce-motion', reduce);
+
+        if (persist) {
+            this.writeStorage('reduceMotion', reduce ? 'on' : 'off');
+
+        }
+
+    }
+
+    private savedThemeSetting(): ThemeSetting {
+        const saved = this.readStorage('themeSetting');
+        if (!saved) return 'auto';
+        if (saved in LEGACY_SETTINGS) {
+            const migrated = LEGACY_SETTINGS[saved];
+            this.writeStorage('themeSetting', migrated);
+            return migrated;
+
+        }
+        return THEME_SETTINGS.includes(saved as ThemeSetting) ? saved as ThemeSetting : 'auto';
+
+    }
+
+    private loadTheme(theme: Theme) {
         let link = document.getElementById('theme') as HTMLLinkElement | null;
 
         if (!link) {
             link = document.createElement('link');
             link.id = 'theme';
             link.rel = 'stylesheet';
-            head.appendChild(link);
+            document.head.appendChild(link);
 
         }
 
-        const themeFile = theme === 'light' ? 'theme-light.css' : 'theme-dark.css';
-        const cacheSuffix = this.buildToken ? `?v=${this.buildToken}` : '';
-        link.href = new URL(`${themeFile}${cacheSuffix}`, document.baseURI).toString();
+        const href = new URL(`theme-${theme}.css`, document.baseURI).toString();
+        if (link.href !== href) {
+            link.onerror = theme === 'light' ? null : () => this.loadTheme('light');
+            link.href = href;
+
+        }
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_BAR_COLORS[theme]);
         this.currentTheme.set(theme);
-        
+
     }
 
-    private detectBuildToken(): string {
-        const mainScript = document.querySelector('script[src*="main-"]') as HTMLScriptElement | null;
-        const src = mainScript?.getAttribute('src') || '';
-        const match = src.match(/main-([A-Za-z0-9]+)\.js/);
+    private readStorage(key: string): string | null {
+        try {
+            return localStorage.getItem(key);
+        } catch {
+            return null;
+        }
 
-        return match?.[1] || '';
-        
+    }
+
+    private writeStorage(key: string, value: string) {
+        try {
+            localStorage.setItem(key, value);
+        } catch {}
+
     }
 
 }

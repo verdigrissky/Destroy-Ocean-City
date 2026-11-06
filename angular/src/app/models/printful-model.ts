@@ -59,7 +59,6 @@ export interface printfulSyncProduct {
   synced: number;
   thumbnail_url: string;
   is_ignored: boolean;
-  // local metadata
   slug?: string;
   slogans?: string[];
   description?: string;

@@ -1,26 +1,29 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, HostListener, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, AfterViewInit, HostListener, ViewChild, ElementRef, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-lightbox',
   template: `
-    <div class="lightbox-backdrop" (click)="close.emit()" role="dialog" aria-modal="true" aria-label="Image lightbox">
-      <div class="lightbox-frame" (click)="$event.stopPropagation()">
-        <button type="button" class="lightbox-close cursor-pointer" (click)="close.emit()" aria-label="Close lightbox">
-          <i class="bi bi-x-lg"></i>
-        </button>
-        <button type="button" class="lightbox-nav lightbox-prev" (click)="prev()" [disabled]="images.length <= 1" aria-label="Previous image">
-          <i class="bi bi-chevron-left"></i>
-        </button>
-        <img #lbImg [src]="images[currentIndex]" class="lightbox-image" [class.transitioning]="isTransitioning" alt="Product image" (load)="onImageLoad()" (error)="onImageLoad()">
-        <button type="button" class="lightbox-nav lightbox-next" (click)="next()" [disabled]="images.length <= 1" aria-label="Next image">
-          <i class="bi bi-chevron-right"></i>
+    <div class="lightbox-backdrop" (click)="close.emit()">
+      <div #frame class="lightbox-frame" role="dialog" aria-modal="true" [attr.aria-label]="label" (click)="$event.stopPropagation()" (keydown)="trapFocus($event)">
+        <button #closeBtn type="button" class="lightbox-close cursor-pointer" (click)="close.emit()" aria-label="Close">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
         </button>
         @if (images.length > 1) {
+          <button type="button" class="lightbox-nav lightbox-prev" (click)="prev()" aria-label="Previous image">
+            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+          </button>
+        }
+        <img #lbImg [src]="images[currentIndex]" class="lightbox-image" [class.transitioning]="isTransitioning" [alt]="imageAlt()" (load)="onImageLoad()" (error)="onImageLoad()">
+        @if (images.length > 1) {
+          <button type="button" class="lightbox-nav lightbox-next" (click)="next()" aria-label="Next image">
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+          </button>
           <div class="lightbox-dots">
             @for (img of images; track $index) {
-              <button type="button" class="lightbox-dot cursor-pointer" [class.active]="$index === currentIndex" (click)="changeImage($index)" [attr.aria-label]="'Image ' + ($index + 1)"></button>
+              <button type="button" class="lightbox-dot cursor-pointer" [class.active]="$index === currentIndex" [attr.aria-current]="$index === currentIndex ? 'true' : null" (click)="changeImage($index)" [attr.aria-label]="'Image ' + ($index + 1)"></button>
             }
           </div>
+          <p class="visually-hidden" aria-live="polite">Image {{ currentIndex + 1 }} of {{ images.length }}</p>
         }
       </div>
     </div>
@@ -140,34 +143,63 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, HostListener
       to   { opacity: 1; transform: scale(1); }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .lightbox-backdrop { animation: none; }
-      .lightbox-frame    { animation: none; }
-      .lightbox-image    { transition: none; }
-    }
+    :host-context(html.reduce-motion) .lightbox-backdrop { animation: none; }
+    :host-context(html.reduce-motion) .lightbox-frame    { animation: none; }
+    :host-context(html.reduce-motion) .lightbox-image    { transition: none; }
   `]
 })
-export class LightboxComponent implements OnInit, OnDestroy {
+export class LightboxComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() images: string[] = [];
   @Input() startIndex = 0;
+  @Input() label = 'Image viewer';
+  @Input() alt = '';
   @Output() close = new EventEmitter<void>();
 
   @ViewChild('lbImg') private imgRef!: ElementRef<HTMLImageElement>;
+  @ViewChild('frame') private frameRef!: ElementRef<HTMLElement>;
+  @ViewChild('closeBtn') private closeBtnRef!: ElementRef<HTMLButtonElement>;
 
   currentIndex = 0;
   isTransitioning = false;
   private priorBodyOverflow = '';
   private loadTimeout: ReturnType<typeof setTimeout> | null = null;
+  private opener: HTMLElement | null = null;
 
   ngOnInit() {
     this.currentIndex = this.startIndex;
+    this.opener = document.activeElement as HTMLElement | null;
     this.priorBodyOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
+  }
+
+  ngAfterViewInit() {
+    this.closeBtnRef.nativeElement.focus();
   }
 
   ngOnDestroy() {
     document.body.style.overflow = this.priorBodyOverflow;
     if (this.loadTimeout) clearTimeout(this.loadTimeout);
+    if (this.opener?.isConnected) this.opener.focus();
+  }
+
+  imageAlt(): string {
+    const base = this.alt || this.label;
+    return this.images.length > 1 ? `${base}, image ${this.currentIndex + 1} of ${this.images.length}` : base;
+  }
+
+  trapFocus(event: KeyboardEvent) {
+    if (event.key !== 'Tab') return;
+    const focusable = Array.from(this.frameRef.nativeElement.querySelectorAll<HTMLElement>('button:not([disabled])'));
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
   }
 
   changeImage(index: number) {
@@ -175,7 +207,6 @@ export class LightboxComponent implements OnInit, OnDestroy {
     this.isTransitioning = true;
     setTimeout(() => {
       this.currentIndex = index;
-      // isTransitioning cleared by onImageLoad(); safety fallback after 5s
       this.loadTimeout = setTimeout(() => this.onImageLoad(), 5000);
     }, 200);
   }

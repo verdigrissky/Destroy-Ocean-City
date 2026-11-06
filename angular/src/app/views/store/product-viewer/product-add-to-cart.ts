@@ -136,7 +136,6 @@ export class AddToCart {
   }
 
   addToCart() {
-    // TODO: wire up cart service
     console.log(`Adding ${this.quantity()} to cart`);
   }
 

@@ -1,20 +1,13 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Main navigation">
     <div class="container-fluid">
-        <!-- Responsive DESTROY OCEAN CITY! Logo -->
-        <a href="/" class="d-flex mb-2 mb-lg-0 text-dark cursor-pointer text-decoration-none">
-            <a class="destroyOceanCityLogo fs-1 d-none d-sm-block" routerLink="/landing" href="#">
-                <span class="destroy">Destroy</span>&nbsp;<span class="ocean-city">Ocean City!</span>
-            </a>
-            <a class="destroyOceanCityLogo fs-4 d-xs-block d-sm-none" routerLink="/landing" href="#">
-                <span class="destroy">Destroy</span>&nbsp;<span class="ocean-city">Ocean City!</span>
-            </a>
+        <a routerLink="/" class="d-flex mb-2 mb-lg-0 text-dark cursor-pointer text-decoration-none">
+            <doc-logo [interactive]="true" class="fs-1 me-4 d-none d-sm-block"></doc-logo>
+            <doc-logo [interactive]="true" class="fs-4 me-4 d-block d-sm-none"></doc-logo>
         </a>
-        <!-- Mobile Hamburger -->
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <!-- Collapsing Navigation Items -->
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="nav navbar-nav">
                 <li class="nav-item">
@@ -44,32 +37,46 @@
                 </li>
             </ul>
         </div>
-        <!-- Theme Switcher -->
         <div class="dropdown ms-auto align-self-center">
-            <a href="javascript:void(null)" class="d-block text-white text-decoration-none dropdown-toggle" id="themeToggler" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi" [ngClass]="theme.currentTheme() === 'light' ? 'bi-brightness-high' : 'bi-moon-stars'"></i>
-            </a>
+            <button type="button" class="theme-toggler d-block text-white text-decoration-none dropdown-toggle" id="themeToggler" data-bs-toggle="dropdown" aria-expanded="false" [attr.aria-label]="'Color theme: ' + themeSettingLabel()">
+                <i class="bi" [ngClass]="theme.currentTheme() === 'light' ? 'bi-brightness-high' : theme.currentTheme() === 'dark' ? 'bi-moon-stars' : 'bi-moon-stars-fill'" aria-hidden="true"></i>
+            </button>
             <ul class="dropdown-menu themeToggleMenu paper text-small" aria-labelledby="themeToggler" data-popper-placement="bottom-end">
                 <li>
-                    <a class="dropdown-item dropdown-highlight cursor-pointer" (click)="theme.setTheme('auto')">
-                        <i ngClass="theme.currentThemeSetting() === 'auto' ? 'bi bi-check2-circle' : 'd-none'"></i>&nbsp;
+                    <button type="button" class="dropdown-item dropdown-highlight cursor-pointer" (click)="theme.setTheme('auto')" [attr.aria-current]="theme.currentThemeSetting() === 'auto' ? 'true' : null">
+                        <i [ngClass]="theme.currentThemeSetting() === 'auto' ? 'bi bi-check2-circle' : 'd-none'" aria-hidden="true"></i>&nbsp;
                         Automatic
-                    </a>
+                    </button>
                 </li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
                 <li>
-                    <a class="dropdown-item dropdown-highlight-light cursor-pointer" (click)="theme.setTheme('forceLight')">
-                        <i ngClass="theme.currentThemeSetting() === 'forceLight' ? 'bi bi-check2-circle' : 'd-none'"></i>&nbsp;
+                    <button type="button" class="dropdown-item dropdown-highlight-light cursor-pointer" (click)="theme.setTheme('light')" [attr.aria-current]="theme.currentThemeSetting() === 'light' ? 'true' : null">
+                        <i [ngClass]="theme.currentThemeSetting() === 'light' ? 'bi bi-check2-circle' : 'd-none'" aria-hidden="true"></i>&nbsp;
                         Light
-                    </a>
+                    </button>
                 </li>
                 <li>
-                    <a class="dropdown-item dropdown-highlight-dark cursor-pointer" (click)="theme.setTheme('forceDark')">
-                        <i ngClass="theme.currentThemeSetting() === 'forceDark' ? 'bi bi-check2-circle' : 'd-none'"></i>&nbsp;
+                    <button type="button" class="dropdown-item dropdown-highlight-dark cursor-pointer" (click)="theme.setTheme('dark')" [attr.aria-current]="theme.currentThemeSetting() === 'dark' ? 'true' : null">
+                        <i [ngClass]="theme.currentThemeSetting() === 'dark' ? 'bi bi-check2-circle' : 'd-none'" aria-hidden="true"></i>&nbsp;
                         Dark
-                    </a>
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="dropdown-item dropdown-highlight-black cursor-pointer" (click)="theme.setTheme('black')" [attr.aria-current]="theme.currentThemeSetting() === 'black' ? 'true' : null">
+                        <i [ngClass]="theme.currentThemeSetting() === 'black' ? 'bi bi-check2-circle' : 'd-none'" aria-hidden="true"></i>&nbsp;
+                        Black
+                    </button>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <button type="button" class="dropdown-item dropdown-highlight cursor-pointer" (click)="theme.toggleReducedMotion()" [attr.aria-pressed]="theme.reducedMotion()">
+                        <i [ngClass]="theme.reducedMotion() ? 'bi bi-check2-circle' : 'd-none'" aria-hidden="true"></i>&nbsp;
+                        Reduce motion
+                    </button>
                 </li>
             </ul>
         </div>

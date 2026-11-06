@@ -28,7 +28,6 @@
               }
             ],
             "styles": [
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "src/styles.css",
               "src/app/animations/skeleton-shimmer-loading.css",
@@ -40,6 +39,11 @@
               {
                 "input": "src/bs-custom-dark.scss",
                 "bundleName": "theme-dark",
+                "inject": false
+              },
+              {
+                "input": "src/bs-custom-black.scss",
+                "bundleName": "theme-black",
                 "inject": false
               }
             ],
@@ -92,7 +96,6 @@
             },
             "development": {
               "buildTarget": "destroyOceanCity:build:development",
-              "proxyConfig": "proxy.conf.json",
               "port": 4400,
               "host": "localhost"
             }

@@ -42,6 +42,18 @@
   cursor: pointer;
 }
 
+.sort-toggle,
+.isolation-pill {
+  position: relative;
+}
+
+.sort-toggle::before,
+.isolation-pill::before {
+  content: '';
+  position: absolute;
+  inset: -0.75rem -0.25rem;
+}
+
 .single-post-loading {
   overflow: hidden;
   opacity: 0;
@@ -187,19 +199,16 @@
   background: var(--doc-skeleton-bg);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .single-post-loading,
-  .blog-heading,
-  .blog-toolbar,
-  .post-reveal,
-  .skeleton-card {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
+:host-context(html.reduce-motion) .single-post-loading,
+:host-context(html.reduce-motion) .blog-heading,
+:host-context(html.reduce-motion) .blog-toolbar,
+:host-context(html.reduce-motion) .post-reveal,
+:host-context(html.reduce-motion) .skeleton-card {
+  animation: none;
+  opacity: 1;
+  transform: none;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .posts-grid {
     grid-template-columns: 1fr;

@@ -49,7 +49,7 @@
       @for (post of posts(); track post.id; let i = $index) {
         <div class="col sk-settle" [style.--reveal-delay]="(i * 80) + 'ms'">
           <div class="card h-100">
-            <postPreviewer [post]="post" [cropFeaturedImage]="true"></postPreviewer>
+            <postPreviewer [post]="post" [cropFeaturedImage]="true" [headingLevel]="3"></postPreviewer>
           </div>
         </div>
       }

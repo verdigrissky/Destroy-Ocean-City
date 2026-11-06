@@ -10,11 +10,11 @@ a {
   	font-style: normal;
 }
 
-h1,h2 {
+h1, h2, .h1, .h2 {
     font-family: "Bowlby One", sans-serif;
     font-weight: 400;
 }
-h3,h4,h5,h6 {
+h3, h4, h5, h6, .h3, .h4, .h5, .h6 {
 	font-family: "Barlow", sans-serif;
   	font-weight: 700;
   	font-style: normal;
@@ -51,68 +51,157 @@ small {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.30);
 }
 
-.destroyOceanCityLogo {
-    font-family: "Bowlby One", sans-serif;
-    margin-right: 25px;
-    text-decoration: none;
-    text-transform: uppercase;
-    cursor: pointer;
-	filter: drop-shadow(5px 5px 10px rgba(0, 0, 0, 0.75));
+html.reduce-motion *,
+html.reduce-motion *::before,
+html.reduce-motion *::after {
+	animation-duration: 0.01ms !important;
+	animation-delay: 0s !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	transition-delay: 0s !important;
+	scroll-behavior: auto !important;
 }
-.destroy {
-    color: #ff5252;
-	transition-duration: 0.5s;
-    text-shadow:
-        0 1px 0 hsl(0, 90%, 58%),
-	    0 2px 0 hsl(0, 75%, 54%),
-	    0 3px 0 hsl(0, 60%, 50%),
-	    0 4px 0 hsl(0, 45%, 46%),
-	    0 5px 0 hsl(0, 40%, 42%),
-	    0 6px 0 hsl(0, 35%, 38%),
-	    0 7px 0 hsl(0, 30%, 34%),
-	    0 8px 0 hsl(0, 25%, 30%);
+html.reduce-motion::view-transition-old(root),
+html.reduce-motion::view-transition-new(root) {
+	animation: none !important;
 }
-.ocean-city {
-	color: #f0f0f0;
-	transition-duration: 0.5s;
+.post-content > * {
+	grid-column: content;
+}
+.post-content img,
+.post-content figure {
+	max-width: 100%;
+	height: auto;
+}
+
+.post-content > :is(p, ul, ol, blockquote, figure),
+.post-content :is(p, li, blockquote, figcaption) {
+	font-family: "Newsreader", Georgia, "Times New Roman", serif;
+	font-optical-sizing: auto;
+	font-weight: 400;
+	font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.1875rem);
+	line-height: 1.7;
+}
+.post-content p {
+	margin-bottom: 1.25em;
+	text-wrap: pretty;
+}
+.post-content :is(strong, b) {
+	font-weight: 650;
+}
+.post-content a {
+	text-underline-offset: 0.18em;
+	text-decoration-thickness: 1px;
+}
+.post-content a:hover {
+	text-decoration-thickness: 2px;
+}
+.post-content > h2,
+.post-content > h3 {
+	margin-top: 1.6em;
+	margin-bottom: 0.6em;
+	text-wrap: balance;
+}
+.post-content > :is(h2, h3):first-child {
+	margin-top: 0;
+}
+.post-content :is(ul, ol) {
+	padding-left: 1.4em;
+	margin-bottom: 1.25em;
+}
+.post-content li {
+	margin-bottom: 0.4em;
+}
+.post-content li::marker {
+	color: var(--doc-link-red, #ff5252);
+}
+.post-content blockquote {
+	margin: 1.75em 0;
+	padding: 0.25em 0 0.25em 1.1em;
+	border-left: 3px solid var(--doc-link-red, #ff5252);
+	font-style: italic;
+}
+.post-content blockquote p:last-child {
+	margin-bottom: 0;
+}
+.post-content figcaption {
+	font-family: "Barlow", sans-serif;
+	font-size: 0.875rem;
+	line-height: 1.4;
+	color: var(--bs-secondary-color);
+	margin-top: 0.5em;
+}
+.post-content > .pull-quote {
+	grid-column: full;
+	margin: 1.5em 0 2em;
+	padding: 0.15em 0 0.15em 1rem;
+	border-left: 3px solid var(--doc-link-red, #ff5252);
+	font-family: "Newsreader", Georgia, "Times New Roman", serif;
+	font-optical-sizing: auto;
+	font-style: italic;
+	font-weight: 500;
+	font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.125rem);
+	line-height: 1.5;
+	text-wrap: balance;
+	color: var(--doc-oblique-color);
+}
+.post-content > .pull-quote :is(em, i) {
+	font-style: normal;
+}
+.post-content > hr {
+	border: 0;
+	opacity: 1;
+	margin: 2.25em 0;
+	text-align: center;
+	color: var(--doc-link-red, #ff5252);
+	overflow: visible;
+}
+.post-content > hr::before {
+	content: "\2022\2002\2022\2002\2022";
+	font-size: 1.1rem;
+	letter-spacing: 0.25em;
+}
+.post-content > h2,
+.post-content > h3 {
+	grid-column: full;
+	color: var(--doc-oblique-color);
+}
+.post-content > h2 {
 	text-shadow:
-        0 1px 0 hsl(0, 0%, 58%),
-	    0 2px 0 hsl(0, 0%, 54%),
-	    0 3px 0 hsl(0, 0%, 50%),
-	    0 4px 0 hsl(0, 0%, 46%),
-	    0 5px 0 hsl(0, 0%, 42%),
-	    0 6px 0 hsl(0, 0%, 38%),
-	    0 7px 0 hsl(0, 0%, 34%),
-	    0 8px 0 hsl(0, 0%, 30%);
+		0 1px 0 var(--doc-oblique-shadow-1),
+		0 3px 0 var(--doc-oblique-shadow-2);
 }
-.destroyOceanCityLogo:hover .destroy { 
-	color: #f0f0f0;
-	filter: drop-shadow(0px 0px 10px rgba(0, 0, 0, 0.75));
+.post-content > h3 {
 	text-shadow:
-        0 1px 0 hsl(0, 0%, 58%),
-	    0 2px 0 hsl(0, 0%, 54%),
-	    0 3px 0 hsl(0, 0%, 50%),
-	    0 4px 0 hsl(0, 0%, 46%),
-	    0 5px 0 hsl(0, 0%, 42%),
-	    0 6px 0 hsl(0, 0%, 38%),
-	    0 7px 0 hsl(0, 0%, 34%),
-	    0 8px 0 hsl(0, 0%, 30%);
+		0 1px 0 var(--doc-oblique-shadow-1),
+		0 2px 0 var(--doc-oblique-shadow-2);
 }
-.destroyOceanCityLogo:hover .ocean-city {
-	color: #FF5252;
-	filter: drop-shadow(0px 0px 10px rgba(255, 57, 57, 0.75));
-	text-shadow:
-        0 1px 0 hsl(0, 90%, 58%),
-	    0 2px 0 hsl(0, 75%, 54%),
-	    0 3px 0 hsl(0, 60%, 50%),
-	    0 4px 0 hsl(0, 45%, 46%),
-	    0 5px 0 hsl(0, 40%, 42%),
-	    0 6px 0 hsl(0, 35%, 38%),
-	    0 7px 0 hsl(0, 30%, 34%),
-	    0 8px 0 hsl(0, 25%, 30%);
+.preview-excerpt p {
+	font-family: "Newsreader", Georgia, "Times New Roman", serif;
+	font-optical-sizing: auto;
+	font-size: 1.0625rem;
+	line-height: 1.55;
+	margin-bottom: 0;
 }
-.destroyOceanCityLogo:active {
-	color: #000000 !important;
+.comment-body :is(p, li, blockquote) {
+	font-family: "Newsreader", Georgia, "Times New Roman", serif;
+	font-optical-sizing: auto;
+	font-size: 1.0625rem;
+	line-height: 1.6;
+}
+.comment-body p:last-child {
+	margin-bottom: 0;
+}
+.theme-toggler {
+	position: relative;
+	background: none;
+	border: 0;
+	padding: 0;
+}
+.theme-toggler::before {
+	content: '';
+	position: absolute;
+	inset: -0.75rem;
 }
 .themeToggleMenu {
 	position: absolute;
@@ -146,6 +235,10 @@ small {
 	background-color: #ffffff !important;
 }
 .dropdown-highlight-dark:hover {
+	color: #e9ecef !important;
+	background-color: #2a2b30 !important;
+}
+.dropdown-highlight-black:hover {
 	color: #F8F9FA !important;
 	background-color: #000000 !important;
 }
@@ -162,6 +255,17 @@ small {
 }
 .photo {
 	border-radius: 45%;
+}
+.btn.btn-primary {
+	--bs-btn-bg: #D43F3F;
+	--bs-btn-border-color: #D43F3F;
+	--bs-btn-hover-bg: #C53636;
+	--bs-btn-hover-border-color: #C53636;
+	--bs-btn-active-bg: #B83030;
+	--bs-btn-active-border-color: #B83030;
+}
+.badge.bg-primary {
+	background-color: #D43F3F !important;
 }
 .doc-button-red {
 	color: var(--bs-white);
@@ -197,8 +301,6 @@ small {
   transition: font-size 400ms ease-out, margin-top 400ms ease-out, margin-bottom 400ms ease-out;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .content-anchor-focus {
-    transition: none;
-  }
+html.reduce-motion .content-anchor-focus {
+  transition: none;
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
+import { plainText } from '../shared/plain-text';
 
 @Injectable({ providedIn: 'root' })
 export class TitleService {
@@ -9,7 +10,7 @@ export class TitleService {
   constructor(private title: Title) {}
 
   setCustomSiteTitle(title: string): void {
-    this.title.setTitle(`DOC! ${title}`);
+    this.title.setTitle(`DOC! ${plainText(title)}`);
 
   }
 
